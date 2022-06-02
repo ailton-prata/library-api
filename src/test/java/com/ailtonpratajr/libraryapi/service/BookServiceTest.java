@@ -37,6 +37,7 @@ public class BookServiceTest {
         //cenário
         Book book = createdValidBook();
 
+        Mockito.when(repository.existsByIsbn(Mockito.anyString())).thenReturn(false);
         Mockito.when(repository.save(book)).thenReturn(
                 Book.builder()
                         .id(1l).isbn("123")
