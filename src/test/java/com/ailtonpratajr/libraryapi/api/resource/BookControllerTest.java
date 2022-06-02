@@ -7,6 +7,7 @@ import com.ailtonpratajr.libraryapi.model.entity.Book;
 import com.ailtonpratajr.libraryapi.service.BookService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.assertj.core.api.Assertions;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.regex.Matcher;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -50,7 +52,7 @@ public class BookControllerTest {
 
         BookDTO dto = createNewBook();
 
-        Book savedBook = Book.builder().id(1L).author("Ailton").title("E que haja guerra").isbn("001").build();
+        Book savedBook = createdValidBook();
 
         BDDMockito.given(service.save(Mockito.any(Book.class))).willReturn(savedBook);
         String json = new ObjectMapper().writeValueAsString(dto);
@@ -117,7 +119,14 @@ public class BookControllerTest {
                 .andExpect(jsonPath("errors[0]").value(mensagemErro));
     }
 
+
     private BookDTO createNewBook() {
         return BookDTO.builder().author("Ailton").title("E que haja guerra").isbn("001").build();
     }
+
+    private Book createdValidBook() {
+        return Book.builder().id(1L).author("Ailton").title("E que haja guerra").isbn("001").build();
+    }
+
+
 }
