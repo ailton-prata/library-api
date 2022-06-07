@@ -30,6 +30,7 @@ import java.util.regex.Matcher;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -125,7 +126,7 @@ public class BookControllerTest {
     public void getBookDetailsTest() throws Exception{
 
         //cenário
-        Long id = 1l;
+        Long id = 1L;
         Book book = Book.builder()
                 .id(id)
                 .title(createNewBook().getTitle())
@@ -150,7 +151,7 @@ public class BookControllerTest {
     @DisplayName("Deve retornar rewsource not found quando o livro procurado não existit.")
     public void BookNotFoundTest() throws Exception {
 
-        BDDMockito.given(service.getId(Mockito.anyLong())).willReturn(Optional.empty());
+        BDDMockito.given(service.getId(anyLong())).willReturn(Optional.empty());
 
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders.get(BOOK_API.concat("/" + 1))
                 .accept(MediaType.APPLICATION_JSON);
@@ -159,6 +160,72 @@ public class BookControllerTest {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    @DisplayName("Deve deleter um livro")
+    public void deleteBookTest() throws Exception{
+
+        BDDMockito.given(service.getId(anyLong())).willReturn(Optional.of(Book.builder().id(1L).build()));
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.delete(BOOK_API.concat("/" + 1));
+
+        mvc.perform(request)
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("Deve retornar resource not found quando não encontrar o livro para deleter.")
+    public void deleteInexistentBookTest() throws Exception{
+
+        BDDMockito.given(service.getId(anyLong())).willReturn(Optional.empty());
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.delete(BOOK_API.concat("/" + 1));
+
+        mvc.perform(request)
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Deve atualizar um livro")
+    public void updateBookTest() throws Exception{
+        Long id = 1L;
+        String json = new ObjectMapper().writeValueAsString(createNewBook());
+
+        Book updatingBook = Book.builder().id(1L).title("Títutlo").author("Author").isbn("321").build();
+        BDDMockito.given(service.getId(anyLong()))
+                .willReturn(Optional.of(updatingBook));
+
+        Book updatedBook = Book.builder().id(id).author("Ailton").title("E que haja guerra").isbn("321").build();
+        BDDMockito.given(service.update(updatingBook)).willReturn(updatedBook);
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .put(BOOK_API.concat("/" + 1))
+                .content(json)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("id").value(id))
+                .andExpect(jsonPath("title").value(createNewBook().getTitle()))
+                .andExpect(jsonPath("author").value(createNewBook().getAuthor()))
+                .andExpect(jsonPath("isbn").value("321"));
+    }
+
+    @Test
+    @DisplayName("Deve retornar 404 ao tentar atualizar um livro inexistente")
+    public void updateInexistentBookTest() throws Exception {
+        String json = new ObjectMapper().writeValueAsString(createNewBook());
+
+        BDDMockito.given(service.getId(anyLong())).willReturn(Optional.empty());
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .put(BOOK_API.concat("/" + 1))
+                .content(json)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mvc.perform(request)
+                .andExpect(status().isNotFound());
+    }
 
     private BookDTO createNewBook() {
         return BookDTO.builder().author("Ailton").title("E que haja guerra").isbn("001").build();
