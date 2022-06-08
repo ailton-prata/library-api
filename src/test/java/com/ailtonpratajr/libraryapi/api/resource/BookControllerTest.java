@@ -227,6 +227,7 @@ public class BookControllerTest {
                 .andExpect(status().isNotFound());
     }
 
+
     private BookDTO createNewBook() {
         return BookDTO.builder().author("Ailton").title("E que haja guerra").isbn("001").build();
     }
