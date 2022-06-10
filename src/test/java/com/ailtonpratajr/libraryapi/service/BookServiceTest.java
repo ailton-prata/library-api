@@ -9,14 +9,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.BDDMockito;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @ExtendWith(SpringExtension.class)
@@ -112,6 +117,38 @@ public class BookServiceTest {
         assertThat(book.isPresent()).isFalse();
 
     }
+
+    @Test
+    @DisplayName("Deve deletar um livro")
+    public void deleteBookTest(){
+        //cenário
+        Long id = 1L;
+        Book book = createdValidBook();
+
+        //execucação
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> service.delete(book));
+
+        //verificação
+        Mockito.verify(repository, Mockito.times(1)).delete(book);
+
+    }
+
+    @Test
+    @DisplayName("Deve ocorrer um erro ao deletar um livro inexistente.")
+    public void deleteInvalidBookTest(){
+        //cenário
+        Book book = new Book();
+
+        //execucação
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> service.delete(book));
+
+        //verificação
+        Mockito.verify(repository, Mockito.never()).delete(book);
+
+    }
+
+
+
 
     private Book createdValidBook() {
         return Book.builder().id(1L).author("Ailton").title("E que haja guerra").isbn("001").build();
