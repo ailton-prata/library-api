@@ -189,10 +189,6 @@ public class BookServiceTest {
 
     }
 
-
-
-
-
     private Book createdValidBook() {
         return Book.builder().id(1L).author("Ailton").title("E que haja guerra").isbn("001").build();
     }
