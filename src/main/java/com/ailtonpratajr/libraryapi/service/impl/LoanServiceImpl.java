@@ -5,6 +5,8 @@ import com.ailtonpratajr.libraryapi.model.entity.Loan;
 import com.ailtonpratajr.libraryapi.model.entity.repository.LoanRepository;
 import com.ailtonpratajr.libraryapi.service.LoanService;
 
+import java.util.Optional;
+
 public class LoanServiceImpl implements LoanService {
     private LoanRepository repository;
 
@@ -21,6 +23,15 @@ public class LoanServiceImpl implements LoanService {
         return repository.save(loan);
     }
 
+    @Override
+    public Optional<Loan> getById(Long id) {
+        return Optional.empty();
+    }
+
+    @Override
+    public Loan update(Loan loan) {
+        return null;
+    }
 
 
 }
