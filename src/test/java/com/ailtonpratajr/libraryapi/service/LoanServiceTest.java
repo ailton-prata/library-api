@@ -1,5 +1,6 @@
 package com.ailtonpratajr.libraryapi.service;
 
+import com.ailtonpratajr.libraryapi.api.dto.LoanFilterDTO;
 import com.ailtonpratajr.libraryapi.exception.BusinessException;
 import com.ailtonpratajr.libraryapi.model.entity.Book;
 import com.ailtonpratajr.libraryapi.model.entity.Loan;
@@ -11,6 +12,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -20,6 +25,8 @@ import static org.mockito.Mockito.*;
 
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 @ExtendWith(SpringExtension.class)
@@ -134,6 +141,35 @@ public class LoanServiceTest {
 
         assertThat(updatedLoan.getReturned()).isTrue();
         verify(repository).save(loan);
+
+    }
+
+    @Test
+    @DisplayName("Deve filtrar empréstimos pelas propriedades")
+    public void findLoanTest(){
+
+        //cenário
+        LoanFilterDTO loanFilterDTO = LoanFilterDTO.builder().customer("Fulano").isbn("321").build();
+
+        Loan loan = createLoan();
+        loan.setId(1L);
+
+        PageRequest pageRequest = PageRequest.of(0, 10);
+        List<Loan> lista = Arrays.asList(loan);
+
+
+        Page<Loan> page = new PageImpl<Loan>(lista, pageRequest, lista.size());
+        when(repository.findByBookIsbnOrCustomer(Mockito.anyString(), Mockito.anyString(), Mockito.any(PageRequest.class)))
+                .thenReturn(page);
+
+        //execucação
+        Page<Loan> result = service.find(loanFilterDTO, pageRequest);
+
+        //verificação
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent()).isEqualTo(lista);
+        assertThat(result.getPageable().getPageNumber()).isEqualTo(0);
+        assertThat(result.getPageable().getPageSize()).isEqualTo(10);
 
     }
 
