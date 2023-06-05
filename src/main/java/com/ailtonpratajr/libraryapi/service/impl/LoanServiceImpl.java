@@ -8,9 +8,11 @@ import com.ailtonpratajr.libraryapi.model.entity.repository.LoanRepository;
 import com.ailtonpratajr.libraryapi.service.LoanService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@Service
 public class LoanServiceImpl implements LoanService {
     private LoanRepository repository;
 
@@ -22,7 +24,6 @@ public class LoanServiceImpl implements LoanService {
     public Loan save(Loan loan) {
         if(repository.existsByBookAndNotReturned(loan.getBook())) {
             throw new BusinessException("Book already loaned");
-
         }
         return repository.save(loan);
     }
@@ -46,6 +47,4 @@ public class LoanServiceImpl implements LoanService {
     public Page<Loan> getLoansByBook(Book book, Pageable pageable) {
         return repository.findByBook(book, pageable);
     }
-
-
 }
