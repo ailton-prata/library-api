@@ -8,6 +8,10 @@ import com.ailtonpratajr.libraryapi.model.entity.Book;
 import com.ailtonpratajr.libraryapi.model.entity.Loan;
 import com.ailtonpratajr.libraryapi.service.BookService;
 import com.ailtonpratajr.libraryapi.service.LoanService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -26,6 +30,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/books")
 @RequiredArgsConstructor
+@Api("Book API")
 public class BookController {
 
     private final BookService service;
@@ -35,6 +40,7 @@ public class BookController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @ApiOperation("Creates a book")
     public BookDTO create(@RequestBody @Valid BookDTO dto){
 
         Book entity = modelMapper.map(dto, Book.class);
@@ -43,6 +49,7 @@ public class BookController {
     }
 
     @GetMapping("{id}")
+    @ApiOperation("Obtains a book details by id")
     public BookDTO get(@PathVariable Long id) {
 
         return service.getId(id).map(book -> modelMapper
@@ -52,12 +59,20 @@ public class BookController {
 
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ApiOperation("Deletes a book by id")
+    @ApiResponses({
+            @ApiResponse(code = 204, message = "Book successfully deleted"),
+            @ApiResponse(code = 401, message = "This Book is unauthorized to delete"),
+            @ApiResponse(code = 403, message = "Book is forbidden to delete")
+    })
+
     public void delete(@PathVariable Long id) {
         Book book = service.getId(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         service.delete(book);
     }
 
     @PutMapping("{id}")
+    @ApiOperation("Updates a book")
     public BookDTO update(@PathVariable Long id, BookDTO dto) {
         return service.getId(id).map (book -> {
 
@@ -72,6 +87,7 @@ public class BookController {
     }
 
     @GetMapping
+    @ApiOperation("Find books by params")
     public Page<BookDTO> find(BookDTO dto, Pageable pageRequest){
         Book filter = modelMapper.map(dto, Book.class);
         Page<Book> result = service.find(filter, pageRequest);
