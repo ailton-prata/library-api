@@ -65,7 +65,6 @@ public class BookController {
             @ApiResponse(code = 401, message = "This Book is unauthorized to delete"),
             @ApiResponse(code = 403, message = "Book is forbidden to delete")
     })
-
     public void delete(@PathVariable Long id) {
         Book book = service.getId(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         service.delete(book);
