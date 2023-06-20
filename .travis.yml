@@ -3,6 +3,8 @@ jdk:
   - oraclejdk17
 dist: trusty
 # git strips the wrapper jar file so we have to force its download during the build
+before_install:
+  - chmod +x mvnw
 install:
   - ./mvnw install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 script:
